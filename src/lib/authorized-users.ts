@@ -3,5 +3,7 @@
 export const authorizedUsers: string[] = [
     "test@example.com",
     "manager@coastal.dev",
-    "admin@coastal-inventory.com"
+    "admin@coastal-inventory.com",
+    "field-tech@coastal-inventory.com",
+    "supervisor@coastal.dev"
 ];
