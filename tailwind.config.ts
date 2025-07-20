@@ -10,8 +10,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['Inter', 'sans-serif'],
-        headline: ['Inter', 'sans-serif'],
+        body: ["'Century Gothic'", 'sans-serif'],
+        headline: ["'Century Gothic'", 'sans-serif'],
         code: ['monospace'],
       },
       colors: {
