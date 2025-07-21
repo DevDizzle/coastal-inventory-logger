@@ -3,8 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useState, useRef, useEffect, useTransition } from "react";
-import { suggestMaterials } from "@/ai/flows/suggest-materials";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -41,7 +40,6 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, PackagePlus, Trash2, Send, CheckCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 const materials = [
     "Yard Waste",
@@ -66,10 +64,10 @@ const siteLocations = [
 ] as const;
 
 const formSchema = z.object({
+  location: z.enum(siteLocations, { required_error: "Please select a site location." }),
   material: z.enum(materials, { required_error: "Please select a material." }),
   quantity: z.coerce.number().positive({ message: "Quantity must be a positive number." }),
   unit: z.enum(["TN", "YD"], { required_error: "Please select a unit." }),
-  location: z.enum(siteLocations, { required_error: "Please select a site location." }),
 });
 
 type StagedItem = z.infer<typeof formSchema> & { id: string };
@@ -82,10 +80,10 @@ export default function InventoryLogger() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      location: undefined,
       material: undefined,
       quantity: 1,
       unit: undefined,
-      location: undefined,
     },
   });
 
@@ -128,11 +126,33 @@ export default function InventoryLogger() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <FormField
                   control={form.control}
+                  name="location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Site Location</FormLabel>
+                       <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a site" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {siteLocations.map(location => (
+                             <SelectItem key={location} value={location}>{location}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
                   name="material"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Material</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select a material" />
@@ -168,7 +188,7 @@ export default function InventoryLogger() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Unit</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select a unit" />
@@ -177,28 +197,6 @@ export default function InventoryLogger() {
                         <SelectContent>
                           <SelectItem value="TN">Tons (TN)</SelectItem>
                           <SelectItem value="YD">Yards (YD)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="location"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Site Location</FormLabel>
-                       <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a site" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {siteLocations.map(location => (
-                             <SelectItem key={location} value={location}>{location}</SelectItem>
-                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -249,10 +247,10 @@ export default function InventoryLogger() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Site Location</TableHead>
                   <TableHead>Material</TableHead>
                   <TableHead className="text-right">Quantity</TableHead>
                   <TableHead>Unit</TableHead>
-                  <TableHead>Location</TableHead>
                   <TableHead className="w-[50px]"></TableHead>
                 </TableRow>
               </TableHeader>
@@ -260,10 +258,10 @@ export default function InventoryLogger() {
                 {stagedItems.length > 0 ? (
                   stagedItems.map((item) => (
                     <TableRow key={item.id} className="transition-opacity duration-300">
+                      <TableCell>{item.location}</TableCell>
                       <TableCell className="font-medium">{item.material}</TableCell>
                       <TableCell className="text-right">{item.quantity}</TableCell>
                       <TableCell>{item.unit}</TableCell>
-                      <TableCell>{item.location}</TableCell>
                       <TableCell>
                         <Button
                           variant="ghost"
