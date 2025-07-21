@@ -105,15 +105,18 @@ export default function InventoryLogger() {
   function handleAddToStage(values: z.infer<typeof formSchema>) {
     const newItem: StagedItem = { ...values, id: crypto.randomUUID() };
     setStagedItems((prev) => [...prev, newItem]);
+    
+    // Persist location, weekEnding, and unit. Reset material and quantity.
     form.reset({
         location: values.location,
         weekEnding: values.weekEnding,
+        unit: values.unit,
         material: undefined,
         quantity: 1,
-        unit: undefined,
     });
-    form.setValue("material", undefined as any, { shouldValidate: false });
-    form.setValue("unit", undefined as any, { shouldValidate: false });
+
+    // Bring focus back to the material field for faster entry
+    form.setFocus("material");
   }
 
   function handleRemoveFromStage(id: string) {
@@ -225,7 +228,7 @@ export default function InventoryLogger() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Material</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value || ""}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select a material" />
