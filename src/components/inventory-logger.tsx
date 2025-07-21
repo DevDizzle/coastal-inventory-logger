@@ -70,7 +70,7 @@ const materials = [
 ] as const;
 
 const siteLocations = [
-    "1004", "2015", "3021", "4055"
+    "1004", "1008", "1001", "1002", "1035", "1041", "1006", "1019", "1036","1026", "1034","1037"
 ] as const;
 
 const formSchema = z.object({
