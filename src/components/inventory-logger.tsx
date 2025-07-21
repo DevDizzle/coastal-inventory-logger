@@ -3,7 +3,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { format, nextSaturday, startOfToday } from "date-fns";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -38,8 +39,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, PackagePlus, Trash2, Send, CheckCircle } from "lucide-react";
+import { Loader2, PackagePlus, Trash2, Send, CheckCircle, CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const materials = [
     "Yard Waste",
@@ -65,6 +73,7 @@ const siteLocations = [
 
 const formSchema = z.object({
   location: z.enum(siteLocations, { required_error: "Please select a site location." }),
+  weekEnding: z.date({ required_error: "Please select a week ending date."}),
   material: z.enum(materials, { required_error: "Please select a material." }),
   quantity: z.coerce.number().positive({ message: "Quantity must be a positive number." }),
   unit: z.enum(["TN", "YD"], { required_error: "Please select a unit." }),
@@ -77,10 +86,13 @@ export default function InventoryLogger() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
   
+  const defaultWeekEnding = useMemo(() => nextSaturday(startOfToday()), []);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       location: undefined,
+      weekEnding: defaultWeekEnding,
       material: undefined,
       quantity: 1,
       unit: undefined,
@@ -90,7 +102,13 @@ export default function InventoryLogger() {
   function handleAddToStage(values: z.infer<typeof formSchema>) {
     const newItem: StagedItem = { ...values, id: crypto.randomUUID() };
     setStagedItems((prev) => [...prev, newItem]);
-    form.reset();
+    form.reset({
+        location: values.location,
+        weekEnding: values.weekEnding,
+        material: undefined,
+        quantity: 1,
+        unit: undefined,
+    });
   }
 
   function handleRemoveFromStage(id: string) {
@@ -105,6 +123,10 @@ export default function InventoryLogger() {
     setStagedItems([]);
     setIsSubmitting(false);
     setSubmissionSuccess(true);
+    form.reset({
+        weekEnding: defaultWeekEnding,
+        quantity: 1,
+    });
     setTimeout(() => setSubmissionSuccess(false), 5000);
   }
 
@@ -117,13 +139,13 @@ export default function InventoryLogger() {
             Log New Inventory
           </CardTitle>
           <CardDescription>
-            Fill in the details below and add items to the staging area.
+            Fill in the details below and add items to the staging area. Week ending defaults to next Saturday.
           </CardDescription>
         </CardHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleAddToStage)}>
             <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
                 <FormField
                   control={form.control}
                   name="location"
@@ -142,6 +164,44 @@ export default function InventoryLogger() {
                           ))}
                         </SelectContent>
                       </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormField
+                  control={form.control}
+                  name="weekEnding"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Week Ending</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -168,7 +228,6 @@ export default function InventoryLogger() {
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="quantity"
@@ -268,6 +327,10 @@ export default function InventoryLogger() {
                             <span className="text-muted-foreground text-sm">Site</span>
                             <span>{item.location}</span>
                         </div>
+                         <div className="flex justify-between">
+                            <span className="text-muted-foreground text-sm">Week Ending</span>
+                            <span>{format(item.weekEnding, "PPP")}</span>
+                        </div>
                         <div className="flex justify-between">
                             <span className="text-muted-foreground text-sm">Quantity</span>
                             <span>{item.quantity} {item.unit}</span>
@@ -289,6 +352,7 @@ export default function InventoryLogger() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Site Location</TableHead>
+                  <TableHead>Week Ending</TableHead>
                   <TableHead>Material</TableHead>
                   <TableHead className="text-right">Quantity</TableHead>
                   <TableHead>Unit</TableHead>
@@ -300,6 +364,7 @@ export default function InventoryLogger() {
                   stagedItems.map((item) => (
                     <TableRow key={item.id} className="transition-opacity duration-300">
                       <TableCell>{item.location}</TableCell>
+                      <TableCell>{format(item.weekEnding, "PPP")}</TableCell>
                       <TableCell className="font-medium">{item.material}</TableCell>
                       <TableCell className="text-right">{item.quantity}</TableCell>
                       <TableCell>{item.unit}</TableCell>
@@ -317,7 +382,7 @@ export default function InventoryLogger() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                    <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
                       No items staged for submission.
                     </TableCell>
                   </TableRow>
