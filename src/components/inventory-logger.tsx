@@ -39,21 +39,37 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-  } from "@/components/ui/popover"
 import { Separator } from "@/components/ui/separator";
-import { Loader2, PackagePlus, Trash2, Send, CheckCircle, BrainCircuit } from "lucide-react";
+import { Loader2, PackagePlus, Trash2, Send, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+const materials = [
+    "Yard Waste",
+    "Wood",
+    "Metal",
+    "RSM",
+    "C&D Residue",
+    "OCC",
+    "Concrete",
+    "C&D",
+    "Mulch",
+    "Unprocessed C&D",
+    "Roofing",
+    "Aggregates",
+    "Asphalt",
+    "Rock",
+    "Fill"
+] as const;
+
+const siteLocations = [
+    "1004", "2015", "3021", "4055"
+] as const;
 
 const formSchema = z.object({
-  material: z.string().min(2, { message: "Material must be at least 2 characters." }),
+  material: z.enum(materials, { required_error: "Please select a material." }),
   quantity: z.coerce.number().positive({ message: "Quantity must be a positive number." }),
-  unit: z.enum(["units", "kg", "liters"], { required_error: "Please select a unit." }),
-  location: z.string().min(2, { message: "Location must be at least 2 characters." }),
+  unit: z.enum(["TN", "YD"], { required_error: "Please select a unit." }),
+  location: z.enum(siteLocations, { required_error: "Please select a site location." }),
 });
 
 type StagedItem = z.infer<typeof formSchema> & { id: string };
@@ -63,62 +79,20 @@ export default function InventoryLogger() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
   
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [isSuggestionsLoading, startSuggestionsTransition] = useTransition();
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      material: "",
+      material: undefined,
       quantity: 1,
       unit: undefined,
-      location: "",
+      location: undefined,
     },
   });
-
-  const materialValue = form.watch("material");
-
-  useEffect(() => {
-    if (debounceTimeout.current) {
-        clearTimeout(debounceTimeout.current);
-    }
-    if (materialValue && materialValue.length > 1) {
-        debounceTimeout.current = setTimeout(() => {
-            startSuggestionsTransition(async () => {
-                try {
-                    const result = await suggestMaterials({ 
-                        partialMaterialName: materialValue,
-                        industry: "Coastal Engineering" // As specified in the logic plan
-                    });
-                    setSuggestions(result.suggestions);
-                    if (result.suggestions.length > 0) {
-                        setIsPopoverOpen(true);
-                    }
-                } catch (error) {
-                    console.error("Failed to fetch material suggestions:", error);
-                    setSuggestions([]);
-                }
-            });
-        }, 300);
-    } else {
-        setSuggestions([]);
-        setIsPopoverOpen(false);
-    }
-    return () => {
-        if (debounceTimeout.current) {
-            clearTimeout(debounceTimeout.current);
-        }
-    };
-  }, [materialValue]);
 
   function handleAddToStage(values: z.infer<typeof formSchema>) {
     const newItem: StagedItem = { ...values, id: crypto.randomUUID() };
     setStagedItems((prev) => [...prev, newItem]);
     form.reset();
-    setSuggestions([]);
-    setIsPopoverOpen(false);
   }
 
   function handleRemoveFromStage(id: string) {
@@ -152,45 +126,28 @@ export default function InventoryLogger() {
           <form onSubmit={form.handleSubmit(handleAddToStage)}>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-                    <PopoverTrigger asChild>
-                        <FormField
-                            control={form.control}
-                            name="material"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Material</FormLabel>
-                                <FormControl>
-                                    <div className="relative">
-                                        <Input placeholder="e.g., Geotextile Fabric" {...field} autoComplete="off" />
-                                        {isSuggestionsLoading && <Loader2 className="animate-spin h-4 w-4 absolute right-2 top-2.5 text-muted-foreground" />}
-                                    </div>
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                        {suggestions.length > 0 && (
-                            <div className="flex flex-col">
-                                {suggestions.map((suggestion, index) => (
-                                    <Button
-                                        key={index}
-                                        variant="ghost"
-                                        className="justify-start font-normal"
-                                        onClick={() => {
-                                            form.setValue("material", suggestion);
-                                            setIsPopoverOpen(false);
-                                        }}
-                                    >
-                                        {suggestion}
-                                    </Button>
-                                ))}
-                            </div>
-                        )}
-                    </PopoverContent>
-                </Popover>
+                <FormField
+                  control={form.control}
+                  name="material"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Material</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a material" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {materials.map(material => (
+                            <SelectItem key={material} value={material}>{material}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <FormField
                   control={form.control}
@@ -218,9 +175,8 @@ export default function InventoryLogger() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="units">Units</SelectItem>
-                          <SelectItem value="kg">Kilograms (kg)</SelectItem>
-                          <SelectItem value="liters">Liters (L)</SelectItem>
+                          <SelectItem value="TN">Tons (TN)</SelectItem>
+                          <SelectItem value="YD">Yards (YD)</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -232,10 +188,19 @@ export default function InventoryLogger() {
                   name="location"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Storage Location</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Warehouse A, Bay 3" {...field} />
-                      </FormControl>
+                      <FormLabel>Site Location</FormLabel>
+                       <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a site" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {siteLocations.map(location => (
+                             <SelectItem key={location} value={location}>{location}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
