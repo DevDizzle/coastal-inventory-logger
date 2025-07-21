@@ -112,6 +112,8 @@ export default function InventoryLogger() {
         quantity: 1,
         unit: undefined,
     });
+    form.setValue("material", undefined as any, { shouldValidate: false });
+    form.setValue("unit", undefined as any, { shouldValidate: false });
   }
 
   function handleRemoveFromStage(id: string) {
