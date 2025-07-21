@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { authorizedUsers } from "@/lib/authorized-users";
 import { ShieldCheck, ShieldAlert } from "lucide-react";
+import InventoryLogger from "./inventory-logger";
 
 export default function AuthGate({ children }: { children: ReactNode }) {
   const [email, setEmail] = useState("");
@@ -34,7 +35,8 @@ export default function AuthGate({ children }: { children: ReactNode }) {
   };
 
   if (isAuthorized) {
-    return <>{children}</>;
+    // Pass the email to the children component, in this case InventoryLogger
+    return React.cloneElement(children as React.ReactElement, { userEmail: email });
   }
 
   return (

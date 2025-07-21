@@ -83,7 +83,8 @@ const formSchema = z.object({
 
 export type StagedItem = z.infer<typeof formSchema> & { id: string };
 
-export default function InventoryLogger() {
+// We accept userEmail as a prop now
+export default function InventoryLogger({ userEmail }: { userEmail?: string }) {
   const [stagedItems, setStagedItems] = useState<StagedItem[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
@@ -124,9 +125,18 @@ export default function InventoryLogger() {
   }
 
   async function handleBatchSubmit() {
+    if (!userEmail) {
+       toast({
+        variant: "destructive",
+        title: "Submission Failed",
+        description: "User email not found. Cannot submit entries.",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      await saveInventoryEntries(stagedItems);
+      await saveInventoryEntries(stagedItems, userEmail);
       setStagedItems([]);
       setSubmissionSuccess(true);
       form.reset({
@@ -162,7 +172,7 @@ export default function InventoryLogger() {
           <form onSubmit={form.handleSubmit(handleAddToStage)}>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
-                <FormField
+                 <FormField
                   control={form.control}
                   name="location"
                   render={({ field }) => (
@@ -315,7 +325,7 @@ export default function InventoryLogger() {
             {submissionSuccess && (
                  <div className="mb-4 flex items-center gap-2 rounded-lg border border-green-300 bg-green-50 p-3 text-sm text-green-800">
                     <CheckCircle className="h-5 w-5" />
-                    <p>Batch submitted successfully! Your data has been saved.</p>
+                    <p>Batch submitted successfully! Your data has been saved and a confirmation email has been sent.</p>
                  </div>
             )}
             
