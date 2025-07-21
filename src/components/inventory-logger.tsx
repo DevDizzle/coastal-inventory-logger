@@ -123,7 +123,7 @@ export default function InventoryLogger() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleAddToStage)}>
             <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <FormField
                   control={form.control}
                   name="location"
@@ -243,7 +243,48 @@ export default function InventoryLogger() {
                     <p>Batch submitted successfully! Confirmation emails are on their way.</p>
                  </div>
             )}
-          <div className="rounded-md border">
+            
+            {/* Mobile View: Card List */}
+            <div className="md:hidden">
+              {stagedItems.length > 0 ? (
+                <div className="space-y-4">
+                  {stagedItems.map((item) => (
+                    <Card key={item.id} className="relative pt-6">
+                       <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleRemoveFromStage(item.id)}
+                          aria-label="Remove item"
+                          className="absolute top-2 right-2 h-7 w-7"
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      <CardContent className="space-y-3 p-4">
+                        <div className="flex justify-between">
+                            <span className="text-muted-foreground text-sm">Material</span>
+                            <span className="font-medium">{item.material}</span>
+                        </div>
+                         <div className="flex justify-between">
+                            <span className="text-muted-foreground text-sm">Site</span>
+                            <span>{item.location}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-muted-foreground text-sm">Quantity</span>
+                            <span>{item.quantity} {item.unit}</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-12 text-center text-muted-foreground">
+                    No items staged for submission.
+                </div>
+              )}
+            </div>
+            
+            {/* Desktop View: Table */}
+            <div className="hidden rounded-md border md:block">
             <Table>
               <TableHeader>
                 <TableRow>
