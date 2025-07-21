@@ -48,6 +48,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Loader2, PackagePlus, Trash2, Send, CheckCircle, CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
+import { saveInventoryEntries } from "@/services/inventoryService";
 
 const materials = [
     "Yard Waste",
@@ -79,12 +81,13 @@ const formSchema = z.object({
   unit: z.enum(["TN", "YD"], { required_error: "Please select a unit." }),
 });
 
-type StagedItem = z.infer<typeof formSchema> & { id: string };
+export type StagedItem = z.infer<typeof formSchema> & { id: string };
 
 export default function InventoryLogger() {
   const [stagedItems, setStagedItems] = useState<StagedItem[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
+  const { toast } = useToast();
   
   const defaultWeekEnding = useMemo(() => nextSaturday(startOfToday()), []);
 
@@ -117,17 +120,25 @@ export default function InventoryLogger() {
 
   async function handleBatchSubmit() {
     setIsSubmitting(true);
-    // Simulate API call and email sending for each item
-    console.log("Submitting:", stagedItems);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setStagedItems([]);
-    setIsSubmitting(false);
-    setSubmissionSuccess(true);
-    form.reset({
-        weekEnding: defaultWeekEnding,
-        quantity: 1,
-    });
-    setTimeout(() => setSubmissionSuccess(false), 5000);
+    try {
+      await saveInventoryEntries(stagedItems);
+      setStagedItems([]);
+      setSubmissionSuccess(true);
+      form.reset({
+          weekEnding: defaultWeekEnding,
+          quantity: 1,
+      });
+      setTimeout(() => setSubmissionSuccess(false), 5000);
+    } catch (error) {
+      console.error("Error submitting batch:", error);
+      toast({
+        variant: "destructive",
+        title: "Submission Failed",
+        description: "Could not save inventory entries. Please try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -152,7 +163,7 @@ export default function InventoryLogger() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Site Location</FormLabel>
-                       <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select a site" />
@@ -212,7 +223,7 @@ export default function InventoryLogger() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Material</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select a material" />
@@ -247,7 +258,7 @@ export default function InventoryLogger() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Unit</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select a unit" />
@@ -299,7 +310,7 @@ export default function InventoryLogger() {
             {submissionSuccess && (
                  <div className="mb-4 flex items-center gap-2 rounded-lg border border-green-300 bg-green-50 p-3 text-sm text-green-800">
                     <CheckCircle className="h-5 w-5" />
-                    <p>Batch submitted successfully! Confirmation emails are on their way.</p>
+                    <p>Batch submitted successfully! Your data has been saved.</p>
                  </div>
             )}
             
