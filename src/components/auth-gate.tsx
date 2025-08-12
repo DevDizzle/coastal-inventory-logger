@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent, type ReactNode } from "react";
+import React, { useState, type FormEvent, type ReactNode } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,6 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { authorizedUsers } from "@/lib/authorized-users";
 import { ShieldCheck, ShieldAlert } from "lucide-react";
-import InventoryLogger from "./inventory-logger";
 
 export default function AuthGate({ children }: { children: ReactNode }) {
   const [email, setEmail] = useState("");
