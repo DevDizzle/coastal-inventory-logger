@@ -4,4 +4,4 @@ export const authorizedUsers: string[] = [
     "eraphaelparra@gmail.com",
     "mbrown@coastalwasteinc.com",
     "wborregard@coastalwasteinc.com"
-];
+]; 
