@@ -6,7 +6,7 @@ Future enhancements include persistence to SharePoint or Cosmos DB.
 
 ---
 
-## Core Features (Planned)
+## Core Features
 
 - **Authorized Access**: Validate user emails against an approved list.  
 - **Staging Table**: Hold multiple entries in the UI before submission.  
@@ -35,6 +35,6 @@ Future enhancements include persistence to SharePoint or Cosmos DB.
    Visit [http](http://localhost:3000)
 
 ## Deployment
--Hosted on Azure Static Web Apps.
--API located in /api folder (Azure Functions).
--Check Functions logs in Azure Portal to see submitted entries.
+- Hosted on Azure Static Web Apps.
+- API located in /api folder (Azure Functions).
+- Check Functions logs in Azure Portal to see submitted entries.
