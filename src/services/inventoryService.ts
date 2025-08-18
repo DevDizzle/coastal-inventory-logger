@@ -17,7 +17,7 @@ import type { StagedItem } from "@/components/inventory-logger";
  */
 export async function saveInventoryEntries(items: StagedItem[], userEmail: string): Promise<void> {
   // This is a placeholder for your future Azure/SharePoint logic.
-  // We simulate a network delay and then log the data.
+  // We simulate a network delay and then log the data. 
   
   console.log("Preparing to submit inventory entries...");
   console.log("Submitted by:", userEmail);
