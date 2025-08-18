@@ -325,7 +325,7 @@ export default function InventoryLogger({ userEmail }: { userEmail?: string }) {
             {submissionSuccess && (
                  <div className="mb-4 flex items-center gap-2 rounded-lg border border-green-300 bg-green-50 p-3 text-sm text-green-800">
                     <CheckCircle className="h-5 w-5" />
-                    <p>Batch submitted successfully! Your data has been saved and a confirmation email has been sent.</p>
+                    <p>Batch submitted successfully! Your data is ready for the next step.</p>
                  </div>
             )}
             

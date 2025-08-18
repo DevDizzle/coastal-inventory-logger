@@ -1,79 +1,48 @@
-import { getFirestore, collection, writeBatch, doc, serverTimestamp, Timestamp } from "firebase/firestore";
 import type { StagedItem } from "@/components/inventory-logger";
-import { getFirebaseApp } from "@/lib/firebase";
-import { format } from "date-fns";
 
-function generateReceiptHtml(items: StagedItem[], userEmail: string): string {
-  const weekEnding = items.length > 0 ? format(items[0].weekEnding, "PPP") : 'N/A';
-  const siteLocation = items.length > 0 ? items[0].location : 'N/A';
-
-  const itemsHtml = items.map(item => `
-    <tr>
-      <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.material}</td>
-      <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${item.quantity} ${item.unit}</td>
-    </tr>
-  `).join('');
-
-  return `
-    <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; padding: 20px;">
-      <h2 style="color: #333;">Inventory Submission Receipt</h2>
-      <p>Thank you, ${userEmail}, for your submission.</p>
-      <p>
-        <strong>Site Location:</strong> ${siteLocation}<br/>
-        <strong>Week Ending:</strong> ${weekEnding}
-      </p>
-      <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-        <thead>
-          <tr>
-            <th style="padding: 8px; border-bottom: 2px solid #333; text-align: left;">Material</th>
-            <th style="padding: 8px; border-bottom: 2px solid #333; text-align: right;">Quantity</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${itemsHtml}
-        </tbody>
-      </table>
-      <p style="margin-top: 20px; font-size: 12px; color: #777;">This is an automated receipt. Please do not reply to this email.</p>
-    </div>
-  `;
-}
-
+/**
+ * Saves a batch of inventory entries.
+ *
+ * In a real-world Azure implementation, this function would be modified
+ * to send the data to a SharePoint file. This could be done by:
+ * 1. Calling a custom API endpoint (e.g., an Azure Function) that uses the SharePoint API.
+ * 2. Triggering a Power Automate flow via an HTTP request.
+ *
+ * The `items` array and `userEmail` are passed to this function,
+ * containing all the necessary data for the submission.
+ *
+ * @param items - An array of staged inventory items.
+ * @param userEmail - The email of the user submitting the entries.
+ * @returns A promise that resolves when the operation is complete.
+ */
 export async function saveInventoryEntries(items: StagedItem[], userEmail: string): Promise<void> {
-  const app = getFirebaseApp();
-  if (!app) {
-    throw new Error("Firebase app not initialized");
-  }
-
-  const db = getFirestore(app);
-  const batch = writeBatch(db);
-  const inventoryCollection = collection(db, "inventory_entries");
-  const mailCollection = collection(db, "mail");
-
-  // Step 1: Save inventory entries
-  items.forEach((item) => {
-    const docRef = doc(inventoryCollection); 
-    const { id, weekEnding, ...rest } = item;
-    
-    batch.set(docRef, {
-      ...rest,
-      submittedBy: userEmail,
-      weekEnding: Timestamp.fromDate(weekEnding),
-      submittedAt: serverTimestamp(),
-    });
-  });
+  // This is a placeholder for your future Azure/SharePoint logic.
+  // We simulate a network delay and then log the data.
   
-  // Step 2: Create the email document
-  const weekEndingDate = items.length > 0 ? format(items[0].weekEnding, "PPP") : "N/A";
-  const mailDocRef = doc(mailCollection);
-  batch.set(mailDocRef, {
-    to: [userEmail],
-    message: {
-      subject: `Inventory Submission Confirmation - Week Ending ${weekEndingDate}`,
-      html: generateReceiptHtml(items, userEmail),
-    },
+  console.log("Preparing to submit inventory entries...");
+  console.log("Submitted by:", userEmail);
+  console.log("Staged Items:", items);
+
+  // Simulate a network request to your backend.
+  await new Promise(resolve => setTimeout(resolve, 1000));
+
+  // In your Azure implementation, you would replace the logging above
+  // with a `fetch` call to your API endpoint.
+  // For example:
+  /*
+  const response = await fetch('YOUR_AZURE_FUNCTION_URL', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userEmail, items }),
   });
 
+  if (!response.ok) {
+    throw new Error('Failed to save inventory entries to SharePoint.');
+  }
+  */
 
-  // Step 3: Commit all changes
-  await batch.commit();
+  console.log("Submission successful (simulation).");
+  
+  // The function must return a promise.
+  return Promise.resolve();
 }
