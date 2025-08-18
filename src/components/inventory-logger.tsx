@@ -106,6 +106,7 @@ export default function InventoryLogger({ userEmail }: { userEmail?: string }) {
   function handleAddToStage(values: z.infer<typeof formSchema>) {
     const newItem: StagedItem = { ...values, id: crypto.randomUUID() };
     setStagedItems((prev) => [...prev, newItem]);
+    console.log("New staged entry:", newItem);
     
     // Persist location, weekEnding, and unit. Reset material and quantity.
     form.reset({
