@@ -1,7 +1,6 @@
 # Coastal Inventory Logger
 
-Internal inventory entry logging app, built with Next.js and hosted via Azure Static Web Apps.  
-**Note**: This repository is public for now, but will be made private once deployment is established and IT sets up access controls.
+Internal inventory entry logging app, built with Next.js and hosted via Azure Static Web Apps. 
 
 ---
 
