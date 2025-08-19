@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -23,6 +24,5 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WHITE_CLIFF_06832810F }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: "/"        # Next.js app root
-          output_location: ".next" # Next.js build output
-          # IMPORTANT: no api_location for Next.js SSR/route handlers
+          app_location: "/"     # keep this
+          # ❌ remove api_location and output_location for Next.js app router
