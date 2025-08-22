@@ -37,4 +37,3 @@ Future enhancements include persistence to SharePoint or Cosmos DB.
 ## Deployment
 - Hosted on Azure Static Web Apps.
 - API located in /api folder (Azure Functions).
-- Check Functions logs in Azure Portal to see submitted entries.
