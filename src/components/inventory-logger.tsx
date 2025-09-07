@@ -135,20 +135,24 @@ export default function InventoryLogger({ userEmail }: { userEmail?: string }) {
     if (stagedItems.length === 0) return;
 
     setIsSubmitting(true);
-    try {
-      // 🔽 Simple POST directly to your SWA Function
-      const res = await fetch("/api/save-inventory", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userEmail,
-          items: stagedItems.map((s) => ({
-            ...s,
-            // Ensure dates serialize cleanly; ISO is fine for logging/persistence
-            weekEnding: s.weekEnding instanceof Date ? s.weekEnding.toISOString() : s.weekEnding,
-          })),
-        }),
-      });
+      try {
+        // 🔽 Post rows directly to the Functions API
+        const rows = stagedItems.map((s) => ({
+          MaterialCode: s.material,
+          Quantity: s.quantity,
+          Unit: s.unit,
+          Location: s.location,
+          Notes:
+            s.weekEnding instanceof Date
+              ? `Week ending ${s.weekEnding.toISOString()}`
+              : `Week ending ${s.weekEnding}`,
+        }));
+
+        const res = await fetch("/api/save-inventory", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(rows),
+        });
 
       if (!res.ok) {
         throw new Error(`HTTP ${res.status}`);
