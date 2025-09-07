@@ -12,7 +12,7 @@ Future enhancements include persistence to SharePoint or Cosmos DB.
 - **Staging Table**: Hold multiple entries in the UI before submission.  
 - **Batch Submission**: Submit all staged entries at once.  
 - **Material Suggestions**: Provide industry-specific material suggestions via LLM.  
-- **Automated Emails**: Send confirmation emails for each submission.
+- **Automated Emails**: Send confirmation emails for each submission. 
 
 
 ---
