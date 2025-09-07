@@ -28,5 +28,3 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: upload
           app_location: "/"   # Next.js app root
-          # no api_location
-          # no output_location
