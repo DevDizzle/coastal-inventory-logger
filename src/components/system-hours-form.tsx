@@ -4,7 +4,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { format, startOfToday } from "date-fns";
 
 import { Button } from "@/components/ui/button";

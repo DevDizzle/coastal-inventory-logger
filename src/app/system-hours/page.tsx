@@ -19,10 +19,7 @@ export default function SystemHoursPage() {
             Coastal Inventory Logger
           </h1>
         </div>
-        <Button
-          asChild
-          className="h-11 w-full px-6 shadow-sm sm:w-auto"
-        >
+        <Button asChild className="h-11 w-full px-6 shadow-sm sm:w-auto">
           <a href="/.auth/logout?post_logout_redirect_uri=/">
             <LogOut className="h-4 w-4" aria-hidden="true" />
             <span>Sign out</span>
