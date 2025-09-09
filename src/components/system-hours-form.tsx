@@ -264,15 +264,15 @@ export default function SystemHoursForm({ userEmail }: { userEmail?: string }) {
         </Form>
       </Card>
 
-      {stagedItems.length > 0 && (
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle className="text-primary" />
-              Staged Entries
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="overflow-x-auto">
+      <Card className="shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <CheckCircle className="text-primary" />
+            Staged Entries
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="overflow-x-auto">
+          {stagedItems.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -299,19 +299,23 @@ export default function SystemHoursForm({ userEmail }: { userEmail?: string }) {
                 ))}
               </TableBody>
             </Table>
-          </CardContent>
-          <CardFooter className="flex justify-end">
-            <Button onClick={handleSubmitBatch} disabled={isSubmitting}>
-              {isSubmitting ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Send className="mr-2 h-4 w-4" />
-              )}
-              Submit All
-            </Button>
-          </CardFooter>
-        </Card>
-      )}
+          ) : (
+            <div className="py-12 text-center text-muted-foreground">
+              No items staged for submission.
+            </div>
+          )}
+        </CardContent>
+        <CardFooter className="flex justify-end">
+          <Button onClick={handleSubmitBatch} disabled={stagedItems.length === 0 || isSubmitting}>
+            {isSubmitting ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Send className="mr-2 h-4 w-4" />
+            )}
+            Submit All
+          </Button>
+        </CardFooter>
+      </Card>
 
       {submissionSuccess && (
         <div className="flex items-center text-green-600 gap-2">
