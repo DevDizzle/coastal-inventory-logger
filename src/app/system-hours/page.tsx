@@ -1,11 +1,12 @@
-// src/app/page.tsx
+// src/app/system-hours/page.tsx
 import Image from "next/image";
 import AuthGate from "@/components/auth-gate";
+import SystemHoursForm from "@/components/system-hours-form";
 import NavigationButtons from "@/components/navigation-buttons";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 
-export default function LandingPage() {
+export default function SystemHoursPage() {
   return (
     <div className="min-h-screen w-full bg-background flex flex-col items-center p-4 sm:p-6 lg:p-8">
       <header className="w-full max-w-5xl mb-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
@@ -28,12 +29,11 @@ export default function LandingPage() {
 
       <main className="w-full flex justify-center">
         <AuthGate>
-          <div className="text-center">
-            <p className="text-lg mb-8">Welcome to Coastal Inventory Logger. Select an option to proceed.</p>
-            <NavigationButtons />
-          </div>
+          <SystemHoursForm />
         </AuthGate>
       </main>
+
+      <NavigationButtons />
     </div>
   );
 }
