@@ -273,6 +273,15 @@ export default function SystemHoursForm({ userEmail }: { userEmail?: string }) {
         </CardHeader>
         <CardContent className="overflow-x-auto">
           {stagedItems.length > 0 ? (
+      {stagedItems.length > 0 && (
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle className="text-primary" />
+              Staged Entries
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -316,6 +325,19 @@ export default function SystemHoursForm({ userEmail }: { userEmail?: string }) {
           </Button>
         </CardFooter>
       </Card>
+          </CardContent>
+          <CardFooter className="flex justify-end">
+            <Button onClick={handleSubmitBatch} disabled={isSubmitting}>
+              {isSubmitting ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="mr-2 h-4 w-4" />
+              )}
+              Submit All
+            </Button>
+          </CardFooter>
+        </Card>
+      )}
 
       {submissionSuccess && (
         <div className="flex items-center text-green-600 gap-2">

@@ -15,6 +15,7 @@ export default function SystemHoursPage() {
           <Link href="/" aria-label="Home" className="cursor-pointer">
             <Image src="/logo.png" alt="Coastal Waste & Recycling Logo" width={150} height={45} />
           </Link>
+          <Image src="/logo.png" alt="Coastal Waste & Recycling Logo" width={150} height={45} />
           <h1 className="text-2xl font-bold font-headline text-primary sm:text-3xl">
             Coastal Inventory Logger
           </h1>
